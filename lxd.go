@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -37,7 +38,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req CreateContainerRequest
+	var req CreateInstanceRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("JSON decode error: %v", err)
 		json.NewEncoder(w).Encode(APIResponse{
@@ -122,9 +123,9 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	containers := make([]ContainerInfo, len(instances))
+	containers := make([]InstanceInfo, len(instances))
 	for i, instance := range instances {
-		containers[i] = ContainerInfo{
+		containers[i] = InstanceInfo{
 			Name:   instance.Name,
 			Status: instance.Status,
 			Type:   instance.Type,
@@ -135,4 +136,56 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Data:    containers,
 	})
+}
+
+func (s *Server) deleteInstance(w http.ResponseWriter, r *http.Request) {
+	returnCors(w, r)
+
+	if r.Method != "DELETE" {
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var req InstanceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("JSON decode error: %v", err)
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   "Invalid JSON",
+		})
+		return
+	}
+
+	if req.Name == "" {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   "Field 'Name' is required",
+		})
+		return
+	}
+
+	op, err := s.lxdClient.DeleteInstance(req.Name)
+	if err != nil {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(APIResponse{
+		Success: true,
+		Data:    fmt.Sprintf("Instance %s deleted successfully", req.Name),
+	})
+
 }

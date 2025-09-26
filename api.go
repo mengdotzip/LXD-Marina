@@ -10,15 +10,19 @@ import (
 	lxd "github.com/canonical/lxd/client"
 )
 
-type ContainerInfo struct {
+type InstanceInfo struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 	Type   string `json:"type"`
 }
 
-type CreateContainerRequest struct {
+type CreateInstanceRequest struct {
 	Name  string `json:"name"`
 	Image string `json:"image"`
+}
+
+type InstanceRequest struct {
+	Name string `json:"name"`
 }
 
 type APIResponse struct {
@@ -37,16 +41,18 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 	server := &Server{lxdClient: conn}
 	mux := http.NewServeMux()
 	apiSRV := &http.Server{
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second, //might have to change these two later(file upload,sse,...)
-		IdleTimeout:  40 * time.Second,
+		ReadTimeout:  20 * time.Second,
+		WriteTimeout: 60 * time.Second, // If you ever get a timeout, this is the place to check :p
+		IdleTimeout:  60 * time.Second,
 		Addr:         ":8080",
 		Handler:      mux,
 	}
 
 	// API routes
+	mux.HandleFunc("GET /favicon.ico", faviconHandler)
 	mux.HandleFunc("GET /api/instances", server.listInstances)
 	mux.HandleFunc("POST /api/instances", server.createInstance)
+	mux.HandleFunc("DELETE /api/instances", server.deleteInstance)
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
 	// Serve static files for now by api, should be with mazarin
@@ -64,9 +70,13 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 	return apiSRV
 }
 
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/favicon.png")
+}
+
 func returnCors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Write(nil)
 }

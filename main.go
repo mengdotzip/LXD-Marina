@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	fmt.Println("WELCOME TO LXD-Marina -made with hate and spite by mengdotzip")
+	fmt.Println("WELCOME TO LXD-Marina -Made with love by mengdotzip")
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -43,6 +43,7 @@ func cleanShutdown(ctx context.Context, wg *sync.WaitGroup, apiServer *http.Serv
 		case <-time.After(shutdownTimeout):
 			log.Println("Shutdown timeout reached, forcing exit")
 		}
+
 	case <-done:
 		log.Println("All goroutines finished CLEAN")
 	}

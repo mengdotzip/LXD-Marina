@@ -22,7 +22,8 @@ type CreateInstanceRequest struct {
 }
 
 type InstanceRequest struct {
-	Name string `json:"name"`
+	Name string      `json:"name"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 type APIResponse struct {
@@ -52,6 +53,7 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 	mux.HandleFunc("GET /favicon.ico", faviconHandler)
 	mux.HandleFunc("GET /api/instances", server.listInstances)
 	mux.HandleFunc("POST /api/instances", server.createInstance)
+	mux.HandleFunc("PUT /api/instances", server.controlInstance)
 	mux.HandleFunc("DELETE /api/instances", server.deleteInstance)
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
@@ -76,7 +78,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 
 func returnCors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Write(nil)
 }

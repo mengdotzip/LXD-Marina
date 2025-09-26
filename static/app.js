@@ -2,6 +2,7 @@ const instancesDiv = document.querySelector('.instances');
 const refreshBtn = document.getElementById('refreshBtn');
 const createBtn = document.getElementById('createBtn');
 
+
 function displayInstances(instances) {
   if (instances.length === 0) {
     instancesDiv.innerHTML = "No instances found, try 'REFRESH' or 'CREATE'";
@@ -12,6 +13,10 @@ function displayInstances(instances) {
     <div class="instance" >
       <strong>${instances.name}</strong> - ${instances.status}
       <button data-name="${instances.name}" data-action="delete" class="instanceBtn">DELETE</button>
+      ${instances.status === 'Running' ? 
+        `<button class="instanceBtn" data-name="${instances.name}" data-action="stop">STOP</button>` :
+        `<button class="instanceBtn" data-name="${instances.name}" data-action="start">START</button>`
+      }
     </div>
   `).join('');
   
@@ -28,8 +33,11 @@ instancesDiv.addEventListener('click', async (e) => {
   
   if (action === 'delete') {
     await deleteInstance(instanceName);
+  } else if (action === 'start' || action === 'stop') {
+    await controlInstance(instanceName, action);
   }
 });
+
 
 async function deleteInstance(name) {
   if (!confirm(`Are you sure you want to delete "${name}"?`)) {
@@ -102,6 +110,28 @@ async function createInstance(name, image) {
         instancesDiv.innerHTML = `Connection error: ${error.message}`;
 }
 }
+
+async function controlInstance(name, data) {
+    try {
+        instancesDiv.innerHTML = `${data === 'start' ? 'Starting' : 'Stopping'} ${name}...`;
+        const response = await fetch('http://192.168.129.119:8080/api/instances', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, data })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            instancesDiv.innerHTML = `${result.data}`;
+            setTimeout(loadInstances, 2000);
+        } else {
+            instancesDiv.innerHTML = `Error: ${result.error}`;
+        }
+    } catch (error) {
+        instancesDiv.innerHTML = `Connection error: ${error.message}`;
+    }
+}
+
 
 refreshBtn.addEventListener('click', loadInstances);
 createBtn.addEventListener('click', showCreateDialog);

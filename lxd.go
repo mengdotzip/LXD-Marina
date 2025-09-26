@@ -15,9 +15,7 @@ type Server struct {
 }
 
 func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	returnCors(w, r)
 
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -96,9 +94,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	returnCors(w, r)
 
 	if r.Method == "OPTIONS" {
 		return
@@ -186,6 +182,78 @@ func (s *Server) deleteInstance(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(APIResponse{
 		Success: true,
 		Data:    fmt.Sprintf("Instance %s deleted successfully", req.Name),
+	})
+
+}
+
+func (s *Server) controlInstance(w http.ResponseWriter, r *http.Request) {
+	returnCors(w, r)
+
+	if r.Method != "PUT" {
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var req InstanceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("JSON decode error: %v", err)
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   "Invalid JSON",
+		})
+		return
+	}
+
+	if req.Name == "" || req.Data == "" {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   "Field 'Name' and 'Data' is required",
+		})
+		return
+	}
+
+	var reqState api.InstanceStatePut
+	switch req.Data {
+	case "start":
+		reqState = api.InstanceStatePut{
+			Action:  "start",
+			Timeout: 60,
+		}
+	case "stop":
+		reqState = api.InstanceStatePut{
+			Action:  "stop",
+			Timeout: 60,
+		}
+	default:
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   "Invalid action. Use 'start' or 'stop'",
+		})
+		return
+	}
+
+	op, err := s.lxdClient.UpdateInstanceState(req.Name, reqState, "")
+	if err != nil {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		json.NewEncoder(w).Encode(APIResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(APIResponse{
+		Success: true,
+		Data:    fmt.Sprintf("Instance %s %sed successfully", req.Name, req.Data),
 	})
 
 }

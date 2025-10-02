@@ -3,6 +3,8 @@
     <head>
         <title>CONSOLE - LXD-Marina</title>
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+        <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     </head>
     <body>
         <div class="mainContainer">
@@ -14,7 +16,7 @@
                 <a href="/">◄ Back to Instances</a>
             </div>
 
-            <textarea id="terminal" placeholder="Connecting to console..."></textarea>
+            <div id="terminal"></div>
         </div>
 
         <script src="console.js"></script>

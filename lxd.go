@@ -253,7 +253,7 @@ func (s *Server) controlInstance(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(APIResponse{
 		Success: true,
-		Data:    fmt.Sprintf("Instance %s %sed successfully", req.Name, req.Data),
+		Data:    fmt.Sprintf("Instance %s %s successfully", req.Name, req.Data),
 	})
 
 }

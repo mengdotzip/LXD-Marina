@@ -17,10 +17,15 @@ function displayInstances(instances) {
         `<button class="instanceBtn" data-name="${instances.name}" data-action="stop">STOP</button>` :
         `<button class="instanceBtn" data-name="${instances.name}" data-action="start">START</button>`
       }
+      <button class="instanceBtn" onclick="openConsole('${instances.name}')">CONSOLE</button>
     </div>
   `).join('');
   
   instancesDiv.innerHTML = html;
+}
+
+function openConsole(instanceName) {
+    window.location.href = `/console/?instance=${instanceName}`;
 }
 
 instancesDiv.addEventListener('click', async (e) => {
@@ -47,7 +52,7 @@ async function deleteInstance(name) {
   try {
     instancesDiv.innerHTML = `Deleting ${name}...`;
     
-    const response = await fetch(`http://192.168.129.119:8080/api/instances`, {
+    const response = await fetch(`/api/instances`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
@@ -77,7 +82,7 @@ async function loadInstances() {
   try {
     instancesDiv.innerHTML = 'Loading...';
     
-    const response = await fetch('http://192.168.129.119:8080/api/instances');
+    const response = await fetch('/api/instances');
     const result = await response.json();
     
     if (result.success) {
@@ -93,7 +98,7 @@ async function loadInstances() {
 async function createInstance(name, image) {
     try {
         instancesDiv.innerHTML = `Creating container "${name}"...`;
-        const response = await fetch('http://192.168.129.119:8080/api/instances', {
+        const response = await fetch('api/instances', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, image })
@@ -114,7 +119,7 @@ async function createInstance(name, image) {
 async function controlInstance(name, data) {
     try {
         instancesDiv.innerHTML = `${data === 'start' ? 'Starting' : 'Stopping'} ${name}...`;
-        const response = await fetch('http://192.168.129.119:8080/api/instances', {
+        const response = await fetch('/api/instances', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, data })

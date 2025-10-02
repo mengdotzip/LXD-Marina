@@ -51,14 +51,19 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 
 	// API routes
 	mux.HandleFunc("GET /favicon.ico", faviconHandler)
+
 	mux.HandleFunc("GET /api/instances", server.listInstances)
 	mux.HandleFunc("POST /api/instances", server.createInstance)
 	mux.HandleFunc("PUT /api/instances", server.controlInstance)
 	mux.HandleFunc("DELETE /api/instances", server.deleteInstance)
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
-	// Serve static files for now by api, should be with mazarin
-	mux.Handle("/", http.FileServer(http.Dir("./static/")))
+	mux.HandleFunc("GET /api/instances/{name}/console", server.createConsoleSession)
+
+	mux.Handle("/console/", http.StripPrefix("/console", http.FileServer(http.Dir("./static/console"))))
+	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
+	mux.Handle("/", http.FileServer(http.Dir("./static/home")))
+	//------------
 
 	go func() {
 		defer wg.Done()
@@ -73,7 +78,7 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 }
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "static/favicon.png")
+	http.ServeFile(w, r, "static/home/favicon.png")
 }
 
 func returnCors(w http.ResponseWriter, r *http.Request) {

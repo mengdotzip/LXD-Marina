@@ -1,6 +1,10 @@
 const instancesDiv = document.querySelector('.instances');
+const eventsDiv = document.querySelector('.events');
 const refreshBtn = document.getElementById('refreshBtn');
 const createBtn = document.getElementById('createBtn');
+
+var events = []
+var eventsIndex = 0
 
 
 function displayInstances(instances) {
@@ -24,6 +28,48 @@ function displayInstances(instances) {
   instancesDiv.innerHTML = html;
 }
 
+//---EVENTS---
+function createEvent(name, type, message = 'pending') {
+  const event = {
+    id: eventsIndex++,
+    name: name,
+    message: message,
+    type: type,
+    time: new Date().toLocaleTimeString()
+  };
+  
+  events.unshift(event);
+    
+  if (events.length > 50) {
+    events.pop();
+    }
+    
+  renderEvents();
+  return event.id;
+}
+
+function renderEvents() {
+  
+    eventsDiv.innerHTML = events.map(event => `
+            <div class="event">
+              <div>Instance: ${event.name}</div>
+              <div>Task: ${event.type} </div>
+              <div id="event-status">Status: ${event.message} </div>
+              <div>Timestamp: ${event.time}</div>
+            </div>
+    `).join('');
+}
+
+function updateEvent(id, data) {
+   const event = events.find(e => e.id === id);
+    if (event) {
+        event.message = data;
+        renderEvents();
+    }
+}
+
+//--------
+
 function openConsole(instanceName) {
     window.location.href = `/console/?instance=${instanceName}`;
 }
@@ -43,14 +89,13 @@ instancesDiv.addEventListener('click', async (e) => {
   }
 });
 
-
 async function deleteInstance(name) {
   if (!confirm(`Are you sure you want to delete "${name}"?`)) {
     return;
   }
   
   try {
-    instancesDiv.innerHTML = `Deleting ${name}...`;
+    eventId = createEvent(name,"Delete Instance");
     
     const response = await fetch(`/api/instances`, {
       method: 'DELETE',
@@ -60,13 +105,13 @@ async function deleteInstance(name) {
 
     const result = await response.json();
     if (result.success) {
-      instancesDiv.innerHTML = `Instance "${name}" deleted!`;
-      setTimeout(loadInstances, 2000);
+      updateEvent(eventId,'Instance ' + name +' deleted')
+      loadInstances();
     } else {
-      instancesDiv.innerHTML = `Error: ${result.error}`;
+      updateEvent(eventId,'Error: ' + result.error)
     }
   } catch (error) {
-    instancesDiv.innerHTML = `Connection error: ${error.message}`;
+    updateEvent(eventId,'Connection error: ' + error.message)
   }
 }
 
@@ -96,8 +141,9 @@ async function loadInstances() {
 }
 
 async function createInstance(name, image) {
+    eventId = createEvent(name,"Create Instance");
     try {
-        instancesDiv.innerHTML = `Creating container "${name}"...`;
+        updateEvent(eventId, "Creating Instance " + name);
         const response = await fetch('api/instances', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,19 +152,19 @@ async function createInstance(name, image) {
         
         const result = await response.json();
         if (result.success) {
-            instancesDiv.innerHTML = `Container "${name}" created!`;
-            setTimeout(loadInstances, 2000);
+            updateEvent(eventId, "Instance " + name + " created");
+            loadInstances();
         } else {
-            instancesDiv.innerHTML = `Error: ${result.error}`;
+            updateEvent(eventId, "Error: " + result.error );
         }
     } catch (error) {
-        instancesDiv.innerHTML = `Connection error: ${error.message}`;
+        updateEvent(eventId, "Connection error: " + error.message );
 }
 }
 
 async function controlInstance(name, data) {
-    try {
-        instancesDiv.innerHTML = `${data === 'start' ? 'Starting' : 'Stopping'} ${name}...`;
+  eventId = createEvent(name,data);  
+  try {
         const response = await fetch('/api/instances', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -127,13 +173,13 @@ async function controlInstance(name, data) {
         
         const result = await response.json();
         if (result.success) {
-            instancesDiv.innerHTML = `${result.data}`;
-            setTimeout(loadInstances, 2000);
+            updateEvent(eventId, result.data)
+            loadInstances();
         } else {
-            instancesDiv.innerHTML = `Error: ${result.error}`;
+            updateEvent(eventId, "Error: " + result.error)
         }
     } catch (error) {
-        instancesDiv.innerHTML = `Connection error: ${error.message}`;
+        updateEvent(eventId, "Connection error: " + error.message)
     }
 }
 

@@ -32,7 +32,7 @@ button {
     height: 60vh; 
     padding: 20px;
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow-y: scroll;
 }
 
 .instance {
@@ -42,4 +42,29 @@ button {
 
 .instanceBtn {
     float: right;
+}
+
+.events {
+    width: 90%;
+    height: 20vh; 
+    box-sizing: border-box;
+    overflow-x: auto;       
+    overflow-y: hidden;   
+    flex: 0 0 auto;      
+    display: flex;
+    flex-direction: row;
+}
+
+.event {
+    min-width: 330px;
+    height: 150px;
+    border: solid 1px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    align-self: flex-start;
+    margin-left: 5%;
 }

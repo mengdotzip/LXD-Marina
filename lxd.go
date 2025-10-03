@@ -46,7 +46,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Name == "" || req.Image == "" {
+	if req.Name == "" || req.Alias == "" {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
 			Error:   "Name and image are required",
@@ -58,15 +58,15 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 		Name: req.Name,
 		Source: api.InstanceSource{
 			Type:     "image",
-			Alias:    "24.04",
+			Alias:    req.Alias,
 			Protocol: "simplestreams",
-			Server:   "https://cloud-images.ubuntu.com/releases/",
+			Server:   req.Server,
 		},
-		Type: "container",
+		Type: api.InstanceType(req.Type),
 	}
 	createReq.Profiles = []string{"default"}
 
-	log.Printf("Creating instance: name='%s', image='%s'", req.Name, req.Image)
+	log.Printf("Creating instance: name='%s', image='%s'", req.Name, req.Alias)
 
 	op, err := s.lxdClient.CreateInstance(createReq)
 	if err != nil {

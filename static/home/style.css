@@ -49,13 +49,13 @@ button {
     height: 20vh; 
     box-sizing: border-box;
     overflow-x: auto;       
-    overflow-y: hidden;   
     flex: 0 0 auto;      
     display: flex;
     flex-direction: row;
 }
 
 .event {
+    width: 330px;
     min-width: 330px;
     height: 150px;
     border: solid 1px;
@@ -67,4 +67,18 @@ button {
 a {
     align-self: flex-start;
     margin-left: 5%;
+}
+
+.createPopup{
+    position: absolute;
+    z-index: 2;
+    width: 500px;
+    height: 230px;
+    border: solid;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,.05), 20px 20px 5px rgba(0,0,0,.5);
+    visibility: hidden;
+    background: white;
 }

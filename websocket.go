@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -80,8 +79,8 @@ func (s *Server) handleConsoleWebSocket(w http.ResponseWriter, r *http.Request) 
 	wsPipe := &WebSocketPipe{conn: wsConn}
 	consoleReq := api.InstanceConsolePost{
 		Type:   "console",
-		Width:  80,
-		Height: 24,
+		Width:  140,
+		Height: 30,
 	}
 
 	args := &lxd.InstanceConsoleArgs{
@@ -118,24 +117,4 @@ func (s *Server) handleConsoleWebSocket(w http.ResponseWriter, r *http.Request) 
 		log.Printf("Console operation error: %v", err)
 	}
 	log.Printf("Console session ended for %s", instanceName)
-}
-
-func (s *Server) createConsoleSession(w http.ResponseWriter, r *http.Request) {
-	returnCors(w, r)
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	instanceName := r.PathValue("name")
-
-	json.NewEncoder(w).Encode(APIResponse{
-		Success: true,
-		Data: map[string]interface{}{
-			"websocket_url": fmt.Sprintf("/console/%s", instanceName),
-			"message":       "Use the websocket_url to connect",
-		},
-	})
 }

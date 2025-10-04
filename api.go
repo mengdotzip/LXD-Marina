@@ -60,10 +60,9 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 	mux.HandleFunc("DELETE /api/instances", server.deleteInstance)
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
-	mux.HandleFunc("GET /api/instances/{name}/console", server.createConsoleSession)
+	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
 
 	mux.Handle("/console/", http.StripPrefix("/console", http.FileServer(http.Dir("./static/console"))))
-	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
 	mux.Handle("/", http.FileServer(http.Dir("./static/home")))
 	//------------
 

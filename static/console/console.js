@@ -5,13 +5,17 @@ const term = new Terminal({
     cursorBlink: true,
     fontSize: 12,
     fontFamily: 'Trebuchet MS", Tahoma, sans-serif',
+    rows: 30,
+    col: 140,
     theme: {
         background: '#ffffffff',
         foreground: '#000000ff',
         cursor: '#000000ff'
     }
 });
-var currentWebsocket
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
+var currentWebsocket;
 
 if (!instanceName) {
     terminal.value = 'Error: No instance name provided in URL';
@@ -21,7 +25,9 @@ if (!instanceName) {
 
 async function connectConsole() {
     //const instanceName = document.getElementById('instanceName').value;
+
     term.open(document.getElementById('terminal'));
+    fitAddon.fit();
     if (!instanceName) {
         alert('Please enter an instance name');
         return;

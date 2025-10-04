@@ -31,8 +31,12 @@ a {
     border: 1px solid;
     padding: 10px;
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow-y: hidden;
     white-space: pre; 
     line-height: 1.2; 
     resize: none;
+}
+
+.xterm .xterm-viewport {
+    width: initial !important;
 }

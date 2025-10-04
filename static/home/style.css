@@ -82,3 +82,17 @@ a {
     visibility: hidden;
     background: white;
 }
+
+.confirmPopup{
+    position: absolute;
+    z-index: 3;
+    width: 280px;
+    height: 90px;
+    border: solid;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    visibility: hidden;
+    box-shadow: 0 0 5px rgba(0,0,0,.05), 20px 20px 5px rgba(0,0,0,.5);
+    background: white;
+}

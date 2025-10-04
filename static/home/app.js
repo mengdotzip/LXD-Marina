@@ -5,6 +5,8 @@ const createBtn = document.getElementById('createBtn');
 const apiCreateBtn = document.getElementById('apiCreateBtn');
 const exitBtn = document.getElementById('exitBtn');
 const createPopup = document.querySelector('.createPopup');
+const confirmPopup = document.querySelector('.confirmPopup');
+const confirmBtn = document.getElementById('confirmBtn');
 
 var events = []
 var eventsIndex = 0
@@ -103,19 +105,15 @@ instancesDiv.addEventListener('click', async (e) => {
   const action = e.target.dataset.action;
   
   if (action === 'delete') {
-    await deleteInstance(instanceName);
+    showConfirmDialog(instanceName);
   } else if (action === 'start' || action === 'stop') {
     await controlInstance(instanceName, action);
   }
 });
 
 async function deleteInstance(name) {
-  if (!confirm(`Are you sure you want to delete "${name}"?`)) {
-    return;
-  }
-  
+  eventId = createEvent(name,"Delete Instance");
   try {
-    eventId = createEvent(name,"Delete Instance");
     
     const response = await fetch(`/api/instances`, {
       method: 'DELETE',
@@ -181,8 +179,36 @@ async function controlInstance(name, data) {
 
 //---POP UP---
 
+//Confirm
+function showConfirmDialog(instanceName) {
+  confirmPopup.style.visibility= "visible";
+  confirmBtn.dataset.name = instanceName;
+}
+
+function hideConfirmDialog() {
+  delete confirmBtn.dataset.name;
+  confirmPopup.style.visibility= "hidden";
+}
+
+confirmPopup.addEventListener('click', async (e) => {
+  if (!e.target.classList.contains('confirmBtns')) {
+    return;
+  }
+
+  const action = e.target.dataset.action;
+  const instanceName = e.target.dataset.name;
+  
+  if (action === 'delete') {
+    deleteInstance(instanceName)
+    hideConfirmDialog();
+  } else if (action === 'cancel') {
+    hideConfirmDialog();
+  }
+});
+
+//CREATE
 function showCreateDialog() {
-    createPopup.style.visibility= "visible";
+  createPopup.style.visibility= "visible";
 }
 
 function hideCreateDialog() {

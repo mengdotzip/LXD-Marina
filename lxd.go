@@ -110,7 +110,7 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instances, err := s.lxdClient.GetInstances(api.InstanceTypeContainer)
+	instances, err := s.lxdClient.GetInstances(api.InstanceTypeAny)
 	if err != nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,

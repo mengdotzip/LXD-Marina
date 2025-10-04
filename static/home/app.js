@@ -1,3 +1,5 @@
+"use strict";
+
 const instancesDiv = document.querySelector('.instances');
 const eventsDiv = document.querySelector('.events');
 const refreshBtn = document.getElementById('refreshBtn');
@@ -8,8 +10,8 @@ const createPopup = document.querySelector('.createPopup');
 const confirmPopup = document.querySelector('.confirmPopup');
 const confirmBtn = document.getElementById('confirmBtn');
 
-var events = []
-var eventsIndex = 0
+var events = [];
+var eventsIndex = 0;
 
 //---EVENTS---
 function createEvent(name, type, message = 'pending') {
@@ -32,16 +34,16 @@ function createEvent(name, type, message = 'pending') {
 }
 
 function renderEvents() {
-  
     eventsDiv.innerHTML = events.map(event => `
-            <div class="event">
-              <div>Instance: ${event.name}</div>
-              <div>Task: ${event.type} </div>
-              <div id="event-status">Status: ${event.message} </div>
-              <div>Timestamp: ${event.time}</div>
-            </div>
+      <div class="event">
+        <div>Instance: ${event.name}</div>
+        <div>Task: ${event.type} </div>
+        <div>Status: ${event.message} </div>
+        <div>Timestamp: ${event.time}</div>
+      </div>
     `).join('');
 }
+
 
 function updateEvent(id, data) {
    const event = events.find(e => e.id === id);
@@ -68,7 +70,7 @@ function displayInstances(instances) {
         `<button class="instanceBtn" data-name="${instances.name}" data-action="stop">STOP</button>` :
         `<button class="instanceBtn" data-name="${instances.name}" data-action="start">START</button>`
       }
-      <button class="instanceBtn" onclick="openConsole('${instances.name}')">CONSOLE</button>
+      <button class="instanceBtn" onclick="openConsole('${instances.name}')">${instances.type == "container" ? "CONSOLE" : "VM"}</button>
     </div>
   `).join('');
   
@@ -93,7 +95,7 @@ async function loadInstances() {
 }
 
 function openConsole(instanceName) {
-    window.location.href = `/console/?instance=${instanceName}`;
+  window.location.href = `/console/?instance=${instanceName}`;
 }
 
 instancesDiv.addEventListener('click', async (e) => {
@@ -112,7 +114,7 @@ instancesDiv.addEventListener('click', async (e) => {
 });
 
 async function deleteInstance(name) {
-  eventId = createEvent(name,"Delete Instance");
+  const eventId = createEvent(name,"Delete Instance");
   try {
     
     const response = await fetch(`/api/instances`, {
@@ -134,7 +136,7 @@ async function deleteInstance(name) {
 }
 
 async function createInstance(name, server, alias, type) {
-    eventId = createEvent(name,"Create Instance");
+    const eventId = createEvent(name,"Create Instance");
     try {
         updateEvent(eventId, "Creating Instance " + name);
         const response = await fetch('api/instances', {
@@ -156,7 +158,7 @@ async function createInstance(name, server, alias, type) {
 }
 
 async function controlInstance(name, data) {
-  eventId = createEvent(name,data);  
+  const eventId = createEvent(name,data);  
   try {
         const response = await fetch('/api/instances', {
         method: 'PUT',

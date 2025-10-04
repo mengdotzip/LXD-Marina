@@ -31,7 +31,8 @@ async function connectConsole() {
         return;
     }
     
-    const wsUrl = `ws://${window.location.host}/api/console/${instanceName}`;
+    const wsProtocol = location.protocol == "https:" ? "wss" : "ws";
+    const wsUrl = `${wsProtocol}://${window.location.host}/api/console/${instanceName}`;
     const websocket = new WebSocket(wsUrl);
     
     websocket.onopen = function() {

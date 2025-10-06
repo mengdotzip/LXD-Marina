@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	lxdClient lxd.InstanceServer
+	currentVm string
 }
 
 func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -34,7 +35,7 @@ type APIResponse struct {
 	Error   string      `json:"error,omitempty"`
 }
 
-func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
+func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (*http.Server, net.Listener) {
 	conn, err := lxd.ConnectLXDUnix("", nil)
 	if err != nil {
 		log.Printf("Warning: Could not connect to LXD: %v\n", err)
@@ -61,10 +62,16 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
 	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
+	mux.HandleFunc("/api/vga/download/{name}", server.handleVGADownload)
 
 	mux.Handle("/console/", http.StripPrefix("/console", http.FileServer(http.Dir("./static/console"))))
 	mux.Handle("/", http.FileServer(http.Dir("./static/home")))
 	//------------
+
+	spiceProxy, err := server.startSPICEProxy(wg) //Our spice proxy, for now ill leave it here but later well have to bind to multiple ports
+	if err != nil {
+		log.Printf("Error starting the spice proxy: %v", err)
+	}
 
 	go func() {
 		defer wg.Done()
@@ -75,7 +82,7 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc) *http.Server {
 		}
 	}()
 
-	return apiSRV
+	return apiSRV, spiceProxy
 }
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {

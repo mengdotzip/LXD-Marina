@@ -70,7 +70,8 @@ function displayInstances(instances) {
         `<button class="instanceBtn" data-name="${instances.name}" data-action="stop">STOP</button>` :
         `<button class="instanceBtn" data-name="${instances.name}" data-action="start">START</button>`
       }
-      <button class="instanceBtn" onclick="openConsole('${instances.name}')">${instances.type == "container" ? "CONSOLE" : "VM"}</button>
+      <button class="instanceBtn" onclick="openConsole('${instances.name}')">CONSOLE</button>
+      ${instances.type !== "container" ? `<button class="instanceBtn" onclick="downloadVga('${instances.name}')">VGA</button>` : ``}
     </div>
   `).join('');
   
@@ -96,6 +97,10 @@ async function loadInstances() {
 
 function openConsole(instanceName) {
   window.location.href = `/console/?instance=${instanceName}`;
+}
+
+function downloadVga(instanceName) {
+  window.location.href = `/api/vga/download/${instanceName}`;
 }
 
 instancesDiv.addEventListener('click', async (e) => {

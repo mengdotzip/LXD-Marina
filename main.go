@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,12 +21,12 @@ func main() {
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	apiServer := initApi(&wg, stop)
-	cleanShutdown(ctx, &wg, apiServer)
+	apiServer, spiceProxy := initApi(&wg, stop, ctx)
+	cleanShutdown(ctx, &wg, apiServer, spiceProxy)
 
 }
 
-func cleanShutdown(ctx context.Context, wg *sync.WaitGroup, apiServer *http.Server) {
+func cleanShutdown(ctx context.Context, wg *sync.WaitGroup, apiServer *http.Server, spiceProxy net.Listener) {
 	done := make(chan struct{})
 	go func() {
 		wg.Wait()
@@ -35,6 +36,7 @@ func cleanShutdown(ctx context.Context, wg *sync.WaitGroup, apiServer *http.Serv
 	select {
 	case <-ctx.Done():
 		apiServer.Close()
+		spiceProxy.Close()
 		shutdownTimeout := 5 * time.Second
 
 		select {

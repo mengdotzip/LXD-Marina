@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -64,8 +65,8 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
 	mux.HandleFunc("/api/vga/download/{name}", server.handleVGADownload)
 
-	mux.Handle("/console/", http.StripPrefix("/console", http.FileServer(http.Dir("./static/console"))))
-	mux.Handle("/", http.FileServer(http.Dir("./static/home")))
+	mux.Handle("/console/", http.StripPrefix("/console", secureServeHandler("./static/console")))
+	mux.Handle("/", secureServeHandler("./static/home"))
 	//------------
 
 	spiceProxy, err := server.startSPICEProxy(wg) //Our spice proxy, for now ill leave it here but later well have to bind to multiple ports
@@ -94,4 +95,23 @@ func returnCors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Write(nil)
+}
+
+func secureServeHandler(target string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		secureServe(w, r, target)
+	}
+}
+
+func secureServe(w http.ResponseWriter, r *http.Request, target string) {
+	root, err := os.OpenRoot(target)
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+	defer root.Close()
+
+	fsys := root.FS()
+	fileServer := http.FileServerFS(fsys)
+	fileServer.ServeHTTP(w, r)
 }

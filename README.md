@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/f877d3b7-4232-4e70-ab76-0666c745fd27
 
 - Unified Dashboard - Single interface for both containers and VMs
 
-- Privacy Preserving - Vanilla JavaScript frontend, no frameworks or compilation needed
+- Simple Setup - Vanilla JavaScript frontend, no frameworks or compilation needed
 
 
 ## Setup
@@ -36,6 +36,10 @@ Please make sure to check out the full documentation of lxd if you have question
 https://documentation.ubuntu.com/lxd/latest/installing/ 
 
 ### LXD-Marina
+
+> [!IMPORTANT]
+> LXD-Marina requires go 1.22 or higher.
+
 The setup of lxd-marina itself is fairly simple:
 ```
 git clone https://github.com/mengdotzip/LXD-Marina.git
@@ -48,3 +52,7 @@ go build
 - Handle multiple spice connection (over multiple ports), now we just have 1 port to work with.
 - Integrate an auth system (Mazarin does it for now).
 - Make server setting so we can set default passwd or cluster in the future.
+
+## Tips
+
+For anybody wanting to read up or code new features, https://documentation.ubuntu.com/lxd/latest/howto/ is a great resource to read up on everything.

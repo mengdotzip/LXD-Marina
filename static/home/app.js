@@ -1,14 +1,15 @@
 "use strict";
 
-const instancesDiv = document.querySelector('.instances');
-const eventsDiv = document.querySelector('.events');
+const instancesDiv = document.getElementById('instancesDiv');
+const eventsDiv = document.getElementById('eventsDiv');
 const refreshBtn = document.getElementById('refreshBtn');
 const createBtn = document.getElementById('createBtn');
 const apiCreateBtn = document.getElementById('apiCreateBtn');
 const exitBtn = document.getElementById('exitBtn');
-const createPopup = document.querySelector('.createPopup');
-const confirmPopup = document.querySelector('.confirmPopup');
+const createPopup = document.getElementById('createPopupDiv');
+const confirmPopup = document.getElementById('confirmPopupDiv');
 const confirmBtn = document.getElementById('confirmBtn');
+const confirmText = document.getElementById('confirmText');
 
 var events = [];
 var eventsIndex = 0;
@@ -27,8 +28,9 @@ function createEvent(name, type, message = 'pending') {
     
   if (events.length > 50) {
     events.pop();
-    }
+  }
     
+  saveEvents();
   renderEvents();
   return event.id;
 }
@@ -51,6 +53,38 @@ function updateEvent(id, data) {
         event.message = data;
         renderEvents();
     }
+}
+
+async function onLoaded() {
+  await loadInstances();
+  
+  // Cached events
+  const cachedEvents = localStorage.getItem('events');
+  
+  if (cachedEvents && cachedEvents !== '') {
+    try {
+      events = JSON.parse(cachedEvents);
+      eventsIndex = events.length > 0 ? Math.max(...events.map(e => e.id)) + 1 : 0;
+      renderEvents();
+    } catch (e) {
+      console.error('Failed to parse cached events:', e);
+      events = [];
+    }
+  }
+}
+
+function saveEvents() {
+  if (!Array.isArray(events)) {
+    console.error('Events is not an array!', events);
+    return;
+  }
+  
+  try {
+    const jsonString = JSON.stringify(events);
+    localStorage.setItem('events', jsonString);
+  } catch (e) {
+    console.error('Failed to save events:', e);
+  }
 }
 
 //--------
@@ -190,11 +224,13 @@ async function controlInstance(name, data) {
 function showConfirmDialog(instanceName) {
   confirmPopup.style.visibility= "visible";
   confirmBtn.dataset.name = instanceName;
+  confirmText.innerHTML = `Are you sure you want to DELETE the instance ${instanceName}`
 }
 
 function hideConfirmDialog() {
   delete confirmBtn.dataset.name;
   confirmPopup.style.visibility= "hidden";
+  confirmText.innerHTML = `Are you sure you want to DELETE the instance`
 }
 
 confirmPopup.addEventListener('click', async (e) => {
@@ -249,4 +285,5 @@ createPopup.addEventListener('click', async (e) => {
 refreshBtn.addEventListener('click', loadInstances);
 createBtn.addEventListener('click', showCreateDialog);
 
-document.addEventListener('DOMContentLoaded', loadInstances);
+document.addEventListener('DOMContentLoaded', onLoaded);
+document.addEventListener("beforeunload", saveEvents)

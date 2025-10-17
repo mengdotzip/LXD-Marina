@@ -11,6 +11,8 @@
                 <h1>LXD-Marina</h1>
             </div>
 
+            <!-- POP UPS -->
+
             <div class="confirmPopup" id="confirmPopupDiv">
                 <a1 id="confirmText">Are you sure you want to DELETE the instance</a1>
                 <button class="confirmBtns" id="confirmBtn" data-action="delete">DELETE</button>
@@ -43,7 +45,23 @@
                 <button class="createBtns" id="exitBtn" data-action="exit">EXIT</button>
             </div>
 
-            
+            <div class="instanceOptionsPopup" id="morePopupDiv">
+                <a1 id="instanceOptionsHead">More Options</a1>
+                <div class="optionsContainer">
+                    <div class="tabsContainer">
+                        <button class="tabBtn" id="tabSnapshots" onclick="window.openSnapshots()">Snapshots</button>
+                        <button class="tabBtn">GPU</button>
+                        <button class="tabBtn" id="tabDelete" onclick="window.openDelete()">DELETE</button>
+                    </div>
+                    <div class="drawTab">
+                        <a1 id="drawTabHeader"></a1>
+                        <div id="drawTabDiv"></div>
+                    </div>
+                </div>
+                <button class="optionsBtn" data-action="exit" onclick="window.hideMoreOptions()">EXIT</button>
+            </div>
+
+            <!-- ------ -->
 
             <div class="usageBtns">
                 <button id="refreshBtn">REFRESH</button>
@@ -51,7 +69,11 @@
             </div>
 
             <div class="instances" id="instancesDiv"></div>
-            <a>EVENTS:</a>
+            
+            <div class="eventHeadContainer">
+                <a>EVENTS:</a>
+                <button class="eventClearBtn" onclick="window.clearEvents()">CLEAR</button>
+            </div>
             <div class="events" id="eventsDiv"></div>
 
         </div>

@@ -1,6 +1,7 @@
 "use strict";
 import { loadInstances, deleteInstance, createInstance } from "./instances.js";
 import { saveEvents, loadEvents } from "./events.js";
+import { clearStylings } from "./moreOptions.js";
 
 const refreshBtn = document.getElementById('refreshBtn');
 const createBtn = document.getElementById('createBtn');
@@ -8,6 +9,8 @@ const createPopup = document.getElementById('createPopupDiv');
 const confirmPopup = document.getElementById('confirmPopupDiv');
 const confirmBtn = document.getElementById('confirmBtn');
 const confirmText = document.getElementById('confirmText');
+const morePopupDiv = document.getElementById('morePopupDiv');
+const instanceOptionsHead = document.getElementById('instanceOptionsHead');
 
 
 //---POP UPS---
@@ -36,6 +39,7 @@ confirmPopup.addEventListener('click', async (e) => {
   if (action === 'delete') {
     deleteInstance(instanceName)
     hideConfirmDialog();
+    window.hideMoreOptions();
   } else if (action === 'cancel') {
     hideConfirmDialog();
   }
@@ -71,6 +75,21 @@ createPopup.addEventListener('click', async (e) => {
     hideCreateDialog();
   }
 });
+
+//MORE Options
+
+window.showMoreOptions = function(instanceName) {
+  morePopupDiv.style.visibility= "visible";
+  morePopupDiv.dataset.name = instanceName;
+  instanceOptionsHead.innerHTML = `More options for instance ${instanceName}`
+}
+
+window.hideMoreOptions  = function() {
+  delete morePopupDiv.dataset.name;
+  morePopupDiv.style.visibility= "hidden";
+  instanceOptionsHead.innerHTML = `More Options`
+  clearStylings();
+}
 
 //-----------
 

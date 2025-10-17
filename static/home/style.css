@@ -85,7 +85,7 @@ a {
 
 .confirmPopup{
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     width: 280px;
     height: 90px;
     border: solid;
@@ -95,4 +95,66 @@ a {
     visibility: hidden;
     box-shadow: 0 0 5px rgba(0,0,0,.05), 20px 20px 5px rgba(0,0,0,.5);
     background: white;
+}
+
+.instanceOptionsPopup {
+    position: absolute;
+    z-index: 3;
+    width: 600px;
+    height: 350px;
+    border: solid;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,.05), 20px 20px 5px rgba(0,0,0,.5);
+    visibility: hidden;
+    background: white;
+}
+
+.tabBtn{
+    width: 100%;
+    padding: 10px;
+}
+
+.optionsBtn{ 
+    margin-top: auto;
+}
+
+.drawTab{
+    width: 85%;
+    height: 100%;
+    border-left: 1px solid;
+}
+
+.optionsContainer{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.tabsContainer{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 15%;
+    padding-right: 10px;
+}
+
+.tabDeleteBtn{
+    margin-left: 40%;
+    margin-top: 20%;
+}
+
+.eventHeadContainer {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.eventClearBtn{
+    align-self: flex-end;
+    margin-right: 5%;
 }

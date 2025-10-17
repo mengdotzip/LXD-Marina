@@ -12,7 +12,7 @@ function displayInstances(instances) {
   const html = instances.map(instances => `
     <div class="instance" >
       <strong>${instances.name}</strong> - ${instances.status}
-      <button data-name="${instances.name}" data-action="delete" class="instanceBtn">DELETE</button>
+      <button data-name="${instances.name}" data-action="more" class="instanceBtn">MORE</button>
       ${instances.status === 'Running' ? 
         `<button class="instanceBtn" data-name="${instances.name}" data-action="stop">STOP</button>` :
         `<button class="instanceBtn" data-name="${instances.name}" data-action="start">START</button>`
@@ -58,8 +58,8 @@ instancesDiv.addEventListener('click', async (e) => {
   const instanceName = e.target.dataset.name;
   const action = e.target.dataset.action;
   
-  if (action === 'delete') {
-    window.showConfirmDialog(instanceName);
+  if (action === 'more') {
+    window.showMoreOptions(instanceName);
   } else if (action === 'start' || action === 'stop') {
     await controlInstance(instanceName, action);
   }

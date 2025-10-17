@@ -73,3 +73,9 @@ export function saveEvents() {
     console.error('Failed to save events:', e);
   }
 }
+
+window.clearEvents = function(){
+  localStorage.clear();
+  events = [];
+  renderEvents();
+}

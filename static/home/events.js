@@ -41,6 +41,7 @@ export function updateEvent(id, data) {
    const event = events.find(e => e.id === id);
     if (event) {
         event.message = data;
+        saveEvents();
         renderEvents();
     }
 }

@@ -65,6 +65,11 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
 	mux.HandleFunc("/api/vga/download/{name}", server.handleVGADownload)
 
+	mux.HandleFunc("GET /api/snapshots", server.listSnapshots)
+	mux.HandleFunc("POST /api/snapshots/create", server.createSnapshot)
+	mux.HandleFunc("POST /api/snapshots/restore", server.restoreSnapshot)
+	mux.HandleFunc("DELETE /api/snapshots", server.deleteSnapshot)
+
 	mux.Handle("/console/", http.StripPrefix("/console", secureServeHandler("./static/console")))
 	mux.Handle("/", secureServeHandler("./static/home"))
 	//------------

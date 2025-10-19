@@ -38,7 +38,7 @@ https://documentation.ubuntu.com/lxd/latest/installing/
 ### LXD-Marina
 
 > [!IMPORTANT]
-> LXD-Marina requires go 1.22 or higher.
+> LXD-Marina requires go 1.24 or higher.
 
 The setup of lxd-marina itself is fairly simple:
 ```
@@ -46,6 +46,8 @@ git clone https://github.com/mengdotzip/LXD-Marina.git
 go build
 ./lxd-marina
 ```
+
+Please make sure to check out the [DOCS](docs/README.md) for some handy tips.
 
 ## Todo
 

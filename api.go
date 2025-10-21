@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"lxd-marina/server"
 	"net"
 	"net/http"
 	"os"
@@ -12,30 +13,6 @@ import (
 	lxd "github.com/canonical/lxd/client"
 )
 
-type InstanceInfo struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
-	Type   string `json:"type"`
-}
-
-type CreateInstanceRequest struct {
-	Name   string `json:"name"`
-	Alias  string `json:"alias"`
-	Server string `json:"server"`
-	Type   string `json:"type"`
-}
-
-type InstanceRequest struct {
-	Name string      `json:"name"`
-	Data interface{} `json:"data,omitempty"`
-}
-
-type APIResponse struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
-}
-
 func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (*http.Server, net.Listener) {
 	conn, err := lxd.ConnectLXDUnix("", nil)
 	if err != nil {
@@ -43,7 +20,7 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 		log.Println("Some features will be limited")
 	}
 
-	server := &Server{lxdClient: conn}
+	server := &server.Server{LxdClient: conn}
 	mux := http.NewServeMux()
 	apiSRV := &http.Server{
 		ReadTimeout:  20 * time.Second,
@@ -56,25 +33,25 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 	// API routes
 	mux.HandleFunc("GET /favicon.ico", faviconHandler)
 
-	mux.HandleFunc("GET /api/instances", server.listInstances)
-	mux.HandleFunc("POST /api/instances", server.createInstance)
-	mux.HandleFunc("PUT /api/instances", server.controlInstance)
-	mux.HandleFunc("DELETE /api/instances", server.deleteInstance)
+	mux.HandleFunc("GET /api/instances", server.ListInstances)
+	mux.HandleFunc("POST /api/instances", server.CreateInstance)
+	mux.HandleFunc("PUT /api/instances", server.ControlInstance)
+	mux.HandleFunc("DELETE /api/instances", server.DeleteInstance)
 	mux.HandleFunc("OPTIONS /api/instances", returnCors)
 
-	mux.HandleFunc("/api/console/{name}", server.handleConsoleWebSocket)
-	mux.HandleFunc("/api/vga/download/{name}", server.handleVGADownload)
+	mux.HandleFunc("/api/console/{name}", server.HandleConsoleWebSocket)
+	mux.HandleFunc("/api/vga/download/{name}", server.HandleVGADownload)
 
-	mux.HandleFunc("GET /api/snapshots", server.listSnapshots)
-	mux.HandleFunc("POST /api/snapshots/create", server.createSnapshot)
-	mux.HandleFunc("POST /api/snapshots/restore", server.restoreSnapshot)
-	mux.HandleFunc("DELETE /api/snapshots", server.deleteSnapshot)
+	mux.HandleFunc("GET /api/snapshots", server.ListSnapshots)
+	mux.HandleFunc("POST /api/snapshots/create", server.CreateSnapshot)
+	mux.HandleFunc("POST /api/snapshots/restore", server.RestoreSnapshot)
+	mux.HandleFunc("DELETE /api/snapshots", server.DeleteSnapshot)
 
 	mux.Handle("/console/", http.StripPrefix("/console", secureServeHandler("./static/console")))
 	mux.Handle("/", secureServeHandler("./static/home"))
 	//------------
 
-	spiceProxy, err := server.startSPICEProxy(wg) //Our spice proxy, for now ill leave it here but later well have to bind to multiple ports
+	spiceProxy, err := server.StartSPICEProxy(wg) //Our spice proxy, for now ill leave it here but later well have to bind to multiple ports
 	if err != nil {
 		log.Printf("Error starting the spice proxy: %v", err)
 	}
@@ -92,7 +69,15 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 }
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "static/home/favicon.png")
+	root, err := os.OpenRoot("static/home")
+	if err != nil {
+		http.Error(w, "Route does not exist", http.StatusBadRequest)
+		return
+	}
+	defer root.Close()
+
+	fsys := root.FS()
+	http.ServeFileFS(w, r, fsys, "favicon.png")
 }
 
 func returnCors(w http.ResponseWriter, r *http.Request) {

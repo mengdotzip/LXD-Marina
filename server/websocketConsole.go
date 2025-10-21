@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -59,7 +59,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func (s *Server) handleConsoleWebSocket(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleConsoleWebSocket(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.PathValue("name")
 
 	log.Printf("Console WebSocket connection request for: %s", instanceName) // switch to verbose logging later
@@ -71,7 +71,7 @@ func (s *Server) handleConsoleWebSocket(w http.ResponseWriter, r *http.Request) 
 	}
 	defer wsConn.Close()
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		wsConn.WriteMessage(websocket.TextMessage, []byte("LXD not connected\r\n"))
 		return
 	}
@@ -98,7 +98,7 @@ func (s *Server) handleConsoleWebSocket(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Starting console session for %s", instanceName) // switch to verbose logging later
 
-	op, err := s.lxdClient.ConsoleInstance(instanceName, consoleReq, args)
+	op, err := s.LxdClient.ConsoleInstance(instanceName, consoleReq, args)
 	if err != nil {
 		log.Printf("Console error: %v", err)
 		wsConn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Console error: %v\r\n", err)))

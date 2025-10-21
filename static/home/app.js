@@ -79,6 +79,7 @@ createPopup.addEventListener('click', async (e) => {
 //MORE Options
 
 window.showMoreOptions = function(instanceName) {
+  clearStylings();
   morePopupDiv.style.visibility= "visible";
   morePopupDiv.dataset.name = instanceName;
   instanceOptionsHead.innerHTML = `More options for instance ${instanceName}`

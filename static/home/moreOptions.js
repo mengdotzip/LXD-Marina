@@ -36,7 +36,8 @@ window.openDelete = function(){
 } 
 
 export function clearStylings() {
-    drawDiv.innerHTML = ""
+    drawDiv.innerHTML = "";
+    drawTabHeader.innerHTML = "";
     tabSnapshots.style.border = "none";
     tabSnapshots.style.borderBottom = "solid";
     tabDelete.style.border = "none";

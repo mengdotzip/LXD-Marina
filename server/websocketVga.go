@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func (n *NetConnPipe) Close() error {
 func (s *Server) handleSPICEProxy(instanceName string, clientConn net.Conn) {
 	defer clientConn.Close()
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		log.Printf("LXD client not connected")
 		return
 	}
@@ -61,7 +61,7 @@ func (s *Server) handleSPICEProxy(instanceName string, clientConn net.Conn) {
 
 	log.Printf("Starting SPICE console session for %s", instanceName)
 
-	op, err := s.lxdClient.ConsoleInstance(instanceName, consoleReq, args)
+	op, err := s.LxdClient.ConsoleInstance(instanceName, consoleReq, args)
 	if err != nil {
 		log.Printf("Console error: %v", err)
 		return
@@ -75,15 +75,15 @@ func (s *Server) handleSPICEProxy(instanceName string, clientConn net.Conn) {
 	log.Printf("SPICE proxy closed for %s", instanceName)
 }
 
-func (s *Server) handleVGADownload(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleVGADownload(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.PathValue("name")
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		http.Error(w, "LXD not connected", http.StatusServiceUnavailable)
 		return
 	}
 
-	instance, _, err := s.lxdClient.GetInstance(instanceName)
+	instance, _, err := s.LxdClient.GetInstance(instanceName)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to get instance: %v", err), http.StatusInternalServerError)
 		return
@@ -116,7 +116,7 @@ fullscreen=0
 	//log.Printf("Generated .vv file for %s", instanceName)
 }
 
-func (s *Server) startSPICEProxy(wg *sync.WaitGroup) (net.Listener, error) {
+func (s *Server) StartSPICEProxy(wg *sync.WaitGroup) (net.Listener, error) {
 	listener, err := net.Listen("tcp", ":5900")
 	if err != nil {
 		log.Printf("Failed to start SPICE proxy: %v", err)

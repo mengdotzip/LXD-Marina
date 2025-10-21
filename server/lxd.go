@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -11,11 +11,35 @@ import (
 )
 
 type Server struct {
-	lxdClient lxd.InstanceServer
+	LxdClient lxd.InstanceServer
 	currentVm string
 }
 
-func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
+type InstanceInfo struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	Type   string `json:"type"`
+}
+
+type CreateInstanceRequest struct {
+	Name   string `json:"name"`
+	Alias  string `json:"alias"`
+	Server string `json:"server"`
+	Type   string `json:"type"`
+}
+
+type InstanceRequest struct {
+	Name string      `json:"name"`
+	Data interface{} `json:"data,omitempty"`
+}
+
+type APIResponse struct {
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   string      `json:"error,omitempty"`
+}
+
+func (s *Server) CreateInstance(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	if r.Method != "POST" {
@@ -29,7 +53,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
 			Error:   "LXD not connected",
@@ -69,7 +93,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Creating instance: name='%s', image='%s'", req.Name, req.Alias)
 
-	op, err := s.lxdClient.CreateInstance(createReq)
+	op, err := s.LxdClient.CreateInstance(createReq)
 	if err != nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
@@ -94,7 +118,7 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ListInstances(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	if r.Method == "OPTIONS" {
@@ -103,7 +127,7 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
 			Error:   "LXD not connected",
@@ -111,7 +135,7 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instances, err := s.lxdClient.GetInstances(api.InstanceTypeAny)
+	instances, err := s.LxdClient.GetInstances(api.InstanceTypeAny)
 	if err != nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
@@ -135,7 +159,7 @@ func (s *Server) listInstances(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *Server) deleteInstance(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteInstance(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	if r.Method != "DELETE" {
@@ -162,7 +186,7 @@ func (s *Server) deleteInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	op, err := s.lxdClient.DeleteInstance(req.Name)
+	op, err := s.LxdClient.DeleteInstance(req.Name)
 	if err != nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
@@ -187,7 +211,7 @@ func (s *Server) deleteInstance(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (s *Server) controlInstance(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ControlInstance(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	if r.Method != "PUT" {
@@ -234,7 +258,7 @@ func (s *Server) controlInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	op, err := s.lxdClient.UpdateInstanceState(req.Name, reqState, "")
+	op, err := s.LxdClient.UpdateInstanceState(req.Name, reqState, "")
 	if err != nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
@@ -257,4 +281,11 @@ func (s *Server) controlInstance(w http.ResponseWriter, r *http.Request) {
 		Data:    fmt.Sprintf("Instance %s %s successfully", req.Name, req.Data),
 	})
 
+}
+
+func returnCors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Write(nil)
 }

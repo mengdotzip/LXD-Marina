@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ type snapshotInfo struct {
 	Stateful  bool      `json:"stateful"`
 }
 
-func (s *Server) listSnapshots(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ListSnapshots(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -27,7 +27,7 @@ func (s *Server) listSnapshots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{
 			Success: false,
 			Error:   "LXD not connected",
@@ -35,7 +35,7 @@ func (s *Server) listSnapshots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snapshots, err := s.lxdClient.GetInstanceSnapshots(instanceName)
+	snapshots, err := s.LxdClient.GetInstanceSnapshots(instanceName)
 	if err != nil {
 		log.Printf("Failed to list snapshots: %v", err)
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: err.Error()})
@@ -57,7 +57,7 @@ func (s *Server) listSnapshots(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *Server) createSnapshot(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateSnapshot(w http.ResponseWriter, r *http.Request) {
 	returnCors(w, r)
 
 	if r.Method != "POST" {
@@ -77,7 +77,7 @@ func (s *Server) createSnapshot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: "LXD not connected"})
 		return
 	}
@@ -87,7 +87,7 @@ func (s *Server) createSnapshot(w http.ResponseWriter, r *http.Request) {
 		Stateful: req.Stateful,
 	}
 
-	op, err := s.lxdClient.CreateInstanceSnapshot(req.Name, snapshot)
+	op, err := s.LxdClient.CreateInstanceSnapshot(req.Name, snapshot)
 	if err != nil {
 		log.Printf("Failed to create snapshot: %v", err)
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: err.Error()})
@@ -103,7 +103,7 @@ func (s *Server) createSnapshot(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(APIResponse{Success: true, Data: "Snapshot created"})
 }
 
-func (s *Server) restoreSnapshot(w http.ResponseWriter, r *http.Request) {
+func (s *Server) RestoreSnapshot(w http.ResponseWriter, r *http.Request) {
 
 	returnCors(w, r)
 
@@ -124,7 +124,7 @@ func (s *Server) restoreSnapshot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: "LXD not connected"})
 		return
 	}
@@ -134,7 +134,7 @@ func (s *Server) restoreSnapshot(w http.ResponseWriter, r *http.Request) {
 		Stateful: req.Stateful,
 	}
 
-	op, err := s.lxdClient.UpdateInstance(req.Name, restoreReq, "")
+	op, err := s.LxdClient.UpdateInstance(req.Name, restoreReq, "")
 	if err != nil {
 		log.Printf("Failed to restore snapshot: %v", err)
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: err.Error()})
@@ -150,7 +150,7 @@ func (s *Server) restoreSnapshot(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(APIResponse{Success: true, Data: "Snapshot restored"})
 }
 
-func (s *Server) deleteSnapshot(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteSnapshot(w http.ResponseWriter, r *http.Request) {
 
 	returnCors(w, r)
 
@@ -170,12 +170,12 @@ func (s *Server) deleteSnapshot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if s.lxdClient == nil {
+	if s.LxdClient == nil {
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: "LXD not connected"})
 		return
 	}
 
-	op, err := s.lxdClient.DeleteInstanceSnapshot(req.Name, req.SnapshotName)
+	op, err := s.LxdClient.DeleteInstanceSnapshot(req.Name, req.SnapshotName)
 	if err != nil {
 		log.Printf("Failed to delete snapshot: %v", err)
 		json.NewEncoder(w).Encode(APIResponse{Success: false, Error: err.Error()})

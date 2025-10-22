@@ -160,17 +160,12 @@ a {
     margin-right: 5%;
 }
 
-.snapshot {
+.snapshot, .snapshotCreate, .gpu{
     padding: 10px;
     border-bottom: 1px solid;
 }
 
-.snapshotCreate {
-    padding: 10px;
-    border-bottom: 1px solid;
-}
-
-#drawTabHeader{
+#drawTabHeader, .gpuHead{
     padding: 5px;
 }
 
@@ -180,4 +175,26 @@ a {
 
 .snapInfo{
     font-size: 12px;
+}
+
+.gpuData{
+    font-size: 12px;
+    overflow-x: auto;
+}
+
+#drawTabDiv{
+    height: 290px;
+    overflow-y: auto;
+}
+
+.gpuDropdown {
+    float: right;
+    margin-right: 5px;
+}
+
+select {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: solid 1px;
+    cursor: pointer;
 }

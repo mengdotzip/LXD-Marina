@@ -47,6 +47,11 @@ func initApi(wg *sync.WaitGroup, stop context.CancelFunc, ctx context.Context) (
 	mux.HandleFunc("POST /api/snapshots/restore", server.RestoreSnapshot)
 	mux.HandleFunc("DELETE /api/snapshots", server.DeleteSnapshot)
 
+	mux.HandleFunc("GET /api/gpu", server.ListGPUDevices)
+	mux.HandleFunc("POST /api/gpu", server.AddGPUDevice)
+	mux.HandleFunc("DELETE /api/gpu", server.RemoveGPUDevice)
+	mux.HandleFunc("GET /api/gpu/host", server.GetHostGPUs)
+
 	mux.Handle("/console/", http.StripPrefix("/console", secureServeHandler("./static/console")))
 	mux.Handle("/", secureServeHandler("./static/home"))
 	//------------
